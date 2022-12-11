@@ -1,0 +1,87 @@
+// This project uses Nicholas Puckett's OSC to LED code
+
+// ULTRASONIC SENSOR OSC
+#include <ArduinoOSCWiFi.h>
+#include <Wire.h>
+
+// WiFi stuff
+// Here we used a phone hotspot
+const char* ssid = "PIXEL";
+const char* pwd = "12345678";
+
+
+// for ArduinoOSC
+const char* sendIPaddress = "192.168.227.104";
+const char* myMessageTag = "/arduino2";
+const int mySendPort = 7000;
+const int myReceivePort = 10000;
+
+
+int TRIG = 3;
+int ECHO = 2;
+int DURATION;
+int DISTANCE;
+int DISTANCE2;
+ 
+ 
+ 
+void setup() {  
+
+
+    WiFi.begin(ssid, pwd);
+
+    while (WiFi.status() != WL_CONNECTED) 
+    {
+     Serial.print(".");
+    delay(500);
+    }
+        
+    Serial.print("WiFi connected, IP = ");
+    Serial.println(WiFi.localIP());
+    OscWiFi.publish(sendIPaddress, mySendPort, myMessageTag, DISTANCE);
+
+  // ULTRASONIC SENSOR
+  pinMode(TRIG, OUTPUT);
+  pinMode(ECHO, INPUT);
+ 
+  // SERIAL
+  Serial.begin(9600);
+  
+}
+ 
+ 
+void loop() {
+
+    printWifiData();
+
+ 
+  digitalWrite(TRIG,HIGH);
+  delay(1);
+  digitalWrite(TRIG,LOW);
+  DURATION = pulseIn(ECHO,HIGH);
+  DISTANCE = DURATION / 58.2;
+ 
+  if(DISTANCE > 0 && DISTANCE < 50 ){
+    // DISTANCE = DISTANCE2;
+    Serial.println(DISTANCE);
+    delay(100);
+  }
+ 
+ OscWiFi.update();
+
+}
+
+void printWifiData() 
+{
+  // print your board's IP address:
+  IPAddress ip = WiFi.localIP();
+  String cnvIP = "IP: "+IpAddress2String(ip);
+  Serial.print("IP Address: ");
+  Serial.println(cnvIP);
+
+  
+}
+String IpAddress2String(const IPAddress& address)
+{
+  return String() + address[0] + "." + address[1] + "." + address[2] + "." + address[3];
+}
