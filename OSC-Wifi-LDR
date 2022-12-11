@@ -1,0 +1,78 @@
+// This project uses Nicholas Puckett's OSC to LED code
+
+// LDR SENSOR OSC
+#include <ArduinoOSCWiFi.h>
+#include <Wire.h>
+
+// WiFi stuff
+// Here we used a phone hotspot
+const char* ssid = "PIXEL";
+const char* pwd = "12345678";
+
+
+// for ArduinoOSC
+const char* sendIPaddress = "192.168.227.104";
+const char* myMessageTag = "/arduino3";
+const int mySendPort = 6000;
+const int myReceivePort = 11000;
+
+
+int lightValue1;
+int sensorPin1 = A1;
+ 
+ 
+ 
+void setup() {  
+
+
+    WiFi.begin(ssid, pwd);
+
+    while (WiFi.status() != WL_CONNECTED) 
+    {
+     Serial.print(".");
+    delay(500);
+    }
+        
+    Serial.print("WiFi connected, IP = ");
+    Serial.println(WiFi.localIP());
+    OscWiFi.publish(sendIPaddress, mySendPort, myMessageTag, lightValue1);
+
+  // LDR SENSOR
+  pinMode(LED_BUILTIN, OUTPUT);
+ 
+  // SERIAL
+  Serial.begin(9600);
+  
+}
+ 
+ 
+void loop() {
+
+    printWifiData();
+
+ 
+  lightValue1 = analogRead(sensorPin1);
+  Serial.println(lightValue1);
+  
+
+ 
+
+ 
+ OscWiFi.update();
+
+}
+
+void printWifiData() 
+{
+  // print your board's IP address:
+  IPAddress ip = WiFi.localIP();
+  String cnvIP = "IP: "+IpAddress2String(ip);
+  Serial.print("IP Address: ");
+  Serial.println(cnvIP);
+
+  
+}
+String IpAddress2String(const IPAddress& address)
+{
+  return String() + address[0] + "." + address[1] + "." + address[2] + "." + address[3];
+}
